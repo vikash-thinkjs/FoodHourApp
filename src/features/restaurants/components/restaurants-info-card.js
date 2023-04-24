@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Image } from "react-native";
 import styled from "styled-components/native";
 import { Card } from "react-native-paper";
 import { SvgXml } from "react-native-svg";
+import { LocalizationContext } from "../../../services/localization/localize.context";
 import star from "../../../../assets/star";
 import { getLocalizedText as translate } from "../../../locales/config";
 
@@ -37,32 +38,37 @@ const Rating = styled.View`
   paddingVertical: ${(props) => props?.theme?.space[1]};
 `;
 
-const RestaurantsInfoCard = ({ restaurants, localeValue }) => {
+const RestaurantsInfoCard = ({ restaurant }) => {
+  const localizationContext = useContext(LocalizationContext);
+  const { localeValue } = localizationContext;
+
   const { 
-    id,
+    placeId,
     name,
-    restaurantCover,
+    photos,
     rating,
     address,
     isOpenNow,
-  } = restaurants?.item;
+    isClosedTemporarily,
+  } = restaurant?.item;
 
-  const ratingArray = Array.from(new Array(Math.floor(rating)));
+  const ratingArray = Array?.from(new Array(Math.floor(rating)));
   const isOpenIcon = "https://img.icons8.com/external-smashingstocks-flat-smashing-stocks/66/null/external-Open-coffee-smashingstocks-flat-smashing-stocks.png";
   const isClosedIcon = "https://img.icons8.com/external-kosonicon-flat-kosonicon/64/null/external-label-ecommerce-kosonicon-flat-kosonicon-2.png";
 
   return (  
     <CardContainer elevation={5}>
-      <CardCover key={id} source={{ uri: restaurantCover[0] }}/>
+      <CardCover key={placeId} source={{ uri: photos[0] }}/>
       <RestaurantInfo>
         <Title>{translate(name, localeValue)}</Title>
         <Section>
         <Rating>
         {ratingArray?.map((item, index) => {
-          return <SvgXml key={index} width={20} height={20} xml={star} />
+          return <SvgXml key={`id-${index}`} width={20} height={20} xml={star} />
         })}
         </Rating>
-        <Image style={{ width: 30, height: 30 }} source={{ uri: isOpenNow ? isOpenIcon : isClosedIcon }} />
+        {isOpenNow && <Image style={{ width: 30, height: 30 }} source={{ uri: isOpenIcon }} />}
+        {isClosedTemporarily && <Image style={{ width: 30, height: 30 }} source={{ uri: isClosedIcon }} />}
         </Section>
         <Address>{translate(address, localeValue)}</Address>
       </RestaurantInfo>

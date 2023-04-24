@@ -1,37 +1,63 @@
-import React, { useState } from "react";
+import React, { useContext } from "react";
 import styled from "styled-components/native";
 import {
   SafeAreaView,
   FlatList,
   StatusBar,
+  TouchableOpacity,
 } from "react-native";
-import { Searchbar } from "react-native-paper";
+import { ActivityIndicator, Searchbar } from "react-native-paper";
 
 import RestaurantsInfoCard from "../components/restaurants-info-card";
+import Search from "../components/search.bar";
 import { restaurantListData } from "../../../restaurantListData";
+import { RestaurantsContext } from "../../../services/restaurants/restaurants.context";
 
+const LoaderContainer = styled.View`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+`;
+
+const Loader = styled(ActivityIndicator)`
+  margin-left: -25px;
+`;
+
+// const SafeAreaContainer = styled(SafeAreaView)`
+//   flex: 1;
+//   ${StatusBar?.currentHeight && `marginTop: ${StatusBar?.currentHeight}px`};
+// `;
 const SafeAreaContainer = styled(SafeAreaView)`
   flex: 1;
-  ${StatusBar?.currentHeight && `marginTop: ${StatusBar?.currentHeight}px`};
 `;
 
-const SearchBarContainer = styled.View`
-  padding: ${(props) => props?.theme?.space[3]};
-`;
-
-const RestaurantsScreen = ({ localeValue }) => {
+const RestaurantsScreen = ({ navigation }) => {
+  const { restaurants, isLoading, error } = useContext(RestaurantsContext);
   const RESTAURANTS_DATA = restaurantListData;
 
   return (
     <SafeAreaContainer>
-      <SearchBarContainer>
-        <Searchbar />
-      </SearchBarContainer>
+      {isLoading && (
+        <LoaderContainer>
+          <Loader
+            size={50}
+            animating={true}
+          />
+        </LoaderContainer>
+      )}
+
+      <Search />
 
       <FlatList
-        data={RESTAURANTS_DATA}
-        renderItem={(item) => <RestaurantsInfoCard restaurants={item} localeValue={localeValue} />}
-        keyExtractor={item => item.id}
+        data={restaurants}
+        renderItem={(item) => {
+          return (
+            <TouchableOpacity onPress={() => navigation?.navigate("RestaurantDetail", {restaurant: item})}>
+              <RestaurantsInfoCard restaurant={item} />
+            </TouchableOpacity>
+          );
+        }}
+        keyExtractor={item => item?.id}
         contentContainerStyle={{ padding: 16 }}
       />
     </SafeAreaContainer>
